@@ -28,4 +28,4 @@ RUN yarn --immutable --prefer-offline --production
 
 RUN yarn build
 
-CMD [ "ash", "-c", "yarn && yarn start" ]
+CMD [ "ash", "-c", "yarn start" ]
