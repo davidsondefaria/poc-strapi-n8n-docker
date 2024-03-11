@@ -42,4 +42,4 @@ RUN yarn --immutable --prefer-offline --production
 
 RUN yarn build
 
-CMD [ "ash", "-c", "yarn cs:import -y && yarn start" ]
+CMD [ "ash", "-c", "yarn -y && yarn start" ]
