@@ -38,7 +38,7 @@ FROM base as cloud
 
 RUN yarn --immutable --prefer-offline --production
 
-RUN rm -rf ./tests
+# RUN rm -rf ./tests
 
 RUN yarn build
 

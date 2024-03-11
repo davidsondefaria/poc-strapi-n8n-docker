@@ -1,0 +1,101 @@
+version: '3'
+
+services:
+  base: &base
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev
+    user: node
+    depends_on:
+      - db
+      # - mailcatcher
+    env_file:
+      - ./.env
+    ports:
+      - 1337:1337
+      - 9229:9229
+    volumes:
+      - ./:/home/node
+      - backendnode:/home/node/node_modules
+      - backenddbtest:/home/node/.tmp
+      - backendcache:/home/node/.cache
+      - backendbuild:/home/node/build
+
+  backend:
+    <<: *base
+    environment:
+      NODE_ENV: development
+      DATABASE_CLIENT: postgres
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+      DATABASE_NAME: strapi_development
+      DATABASE_USERNAME: postgres
+      DATABASE_PASSWORD: zrp@1234
+      SMTP_HOST: mailcatcher
+      SMTP_PORT: 1025
+
+  # tests: &tests
+  #   <<: *base
+  #   command: yarn test
+  #   environment:
+  #     NODE_ENV: test
+  #     DATABASE_NAME: strapi_test
+  #     DATABASE_CLIENT: postgres
+  #     DATABASE_HOST: db
+  #     DATABASE_PORT: 5432
+  #     DATABASE_USERNAME: postgres
+  #     DATABASE_PASSWORD: zrp@1234
+
+  # ci-tests:
+  #   <<: *tests
+  #   volumes:
+  #     - backendnode:/home/node/node_modules
+  #     - backenddbtest:/home/node/.tmp
+  #     - backendcache:/home/node/.cache
+  #     - backendbuild:/home/node/build
+
+  db:
+    image: library/postgres:14-alpine
+    expose:
+      - 5432
+    ports:
+      - 5432:5432
+    environment:
+      PGPORT: 5432
+      POSTGRES_DB: strapi_development
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: zrp@1234
+    volumes:
+      - backenddbdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin4:
+    hostname: pgadmin4
+    image: dpage/pgadmin4
+    ports:
+      - 6003:80
+    volumes:
+      - pgadmindata:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: 'dev@zrp.com.br'
+      PGADMIN_DEFAULT_PASSWORD: 'zrp@1234'
+    depends_on:
+      - db
+
+  # mailcatcher:
+  #   hostname: mailcatcher
+  #   image: schickling/mailcatcher
+  #   ports: ['1080:1080']
+
+volumes:
+  backenddbdata:
+  backendnode:
+  backendcache:
+  backenddbtest:
+  backendbuild:
+  pgadmindata:
